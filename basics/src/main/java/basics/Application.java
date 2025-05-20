@@ -8,5 +8,8 @@ public class Application {
 
         // Sortie d'erreur
         System.err.println("Ceci est une erreur !");
+
+        int g = Euclid.gcd(15, 21);
+        System.out.println("Gcd = " + g);
     }
 }
