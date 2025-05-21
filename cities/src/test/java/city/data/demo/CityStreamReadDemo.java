@@ -1,6 +1,9 @@
 package city.data.demo;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import utils.CsvFormatException;
+import utils.IOTools;
 
 import java.io.*;
 import java.net.URI;
@@ -9,6 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.IllegalFormatException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 public class CityStreamReadDemo {
@@ -67,6 +74,60 @@ public class CityStreamReadDemo {
 
         // here catch exceptions or let them propagate
 
+    }
+
+    @Test
+    void demoReadDataTools() {
+        Stream<String> streamLines = IOTools.resourceToStream(getClass(), "/communes_france_2025.csv.gz");
+        streamLines.limit(10)
+                .forEach(System.out::println);
+    }
+
+    @Test
+    void demoReadDataParseCsv() {
+        // headers
+        String headers = IOTools.resourceToStream(getClass(), "/communes_france_2025.csv.gz")
+                .findFirst()
+                .orElseThrow(CsvFormatException::new);
+        System.out.println(headers);
+
+        // data
+        System.out.println();
+        IOTools.resourceToStream(getClass(), "/communes_france_2025.csv.gz")
+                .skip(1)
+                .limit(10)
+                .forEach(System.out::println);
+        // TODO: parse each line as CSV line
+    }
+
+    @Test
+    void testCsvFormatException() {
+        CsvFormatException ex = Assertions.assertThrows(
+                CsvFormatException.class,
+                () -> Stream.empty()
+                    .findFirst()
+                    .orElseThrow(CsvFormatException::new)
+        );
+        Assertions.assertEquals("the input is not conform to CSV standard", ex.getMessage());
+        // System.out.println(ex);
+    }
+
+    @Test
+    void demoReadDataParseCsv2() {
+        // method mixing iterator and stream mechanisms
+        var iterator =IOTools.resourceToStream(getClass(), "/communes_france_2025.csv.gz")
+                .iterator();
+        if (!iterator.hasNext()) throw new CsvFormatException();
+        String headerLine = iterator.next(); // advance and return next element
+        String[] headers = headerLine.split(",", 0);
+        System.out.println(Arrays.toString(headers));
+        System.out.println();
+
+        Iterable<String> iterable = () -> iterator;
+        var streamLines = StreamSupport.stream(iterable.spliterator(), false);
+        streamLines.limit(10)
+                .map(line -> line.split(",", 0))
+                .forEach(cityInfoArray -> System.out.println(Arrays.toString(cityInfoArray)));
     }
 
 }
