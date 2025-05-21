@@ -128,15 +128,20 @@ public class CityStreamReadDemo {
         Iterable<String> iterable = () -> iterator;
         var streamLines = StreamSupport.stream(iterable.spliterator(), false);
         streamLines.limit(10)
+                .map(line -> line.replace(", ", "|"))
                 .map(line -> line.split(",", 0))
-                //.peek(cityInfoArray -> System.out.println(Arrays.toString(cityInfoArray)))
+                //.filter(cityInfoArray -> cityInfoArray.length == headers.length)
+                // .peek(cityInfoArray -> System.out.println(Arrays.toString(cityInfoArray)))
                 .map(cityInfoArray -> CsvConverter.rowToCity(
                         headers,
                         cityInfoArray,
                         Map.of(
                                 "name", "nom_standard",
-                                "inseeCode", "code_insee"
-                                // TODO: other infos
+                                "inseeCode", "code_insee",
+                                "zipcode", "code_postal",
+                                "departmentNumber", "dep_code",
+                                "department", "dep_nom",
+                                "population", "population"
                         )
                 ))
                 .forEach(System.out::println);

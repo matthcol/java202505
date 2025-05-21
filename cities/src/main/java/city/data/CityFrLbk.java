@@ -16,7 +16,7 @@ import lombok.*;
 @Builder // uses @AllArgsConstructor
 @Getter
 @Setter
-@ToString(of={"name", "zipcode", "inseeCode"})
+@ToString(of={"name", "zipcode", "inseeCode", "population"})
 public class CityFrLbk {
     @NotNull(message = "{cityfrblk.name.notnull}")
     private String name;
