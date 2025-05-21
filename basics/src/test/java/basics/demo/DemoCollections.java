@@ -180,4 +180,12 @@ public class DemoCollections {
         sortedSetWordsFr.add("xylophone");
         System.out.println(sortedSetWordsFr);
     }
+
+    @Test
+    void demoListOfIntegers() {
+        List<Integer> numbers = List.of(11, 22, 33, 44);
+        Integer element2 = numbers.get(2);
+        int element2b = numbers.get(2); // unboxing
+        int z = 3 + numbers.get(2); // unboxing
+    }
 }

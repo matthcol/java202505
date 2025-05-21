@@ -32,6 +32,7 @@
             <artifactId>jakarta.validation-api</artifactId>
             <version>3.1.1</version>
         </dependency>
+        <!-- NB: since 8.0.2, hibernate validator needs an explicit setup of EL factory -->
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
