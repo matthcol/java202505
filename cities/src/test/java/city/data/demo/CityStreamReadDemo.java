@@ -1,5 +1,6 @@
 package city.data.demo;
 
+import city.converter.CsvConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utils.CsvFormatException;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.IllegalFormatException;
+import java.util.Map;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
@@ -127,7 +129,17 @@ public class CityStreamReadDemo {
         var streamLines = StreamSupport.stream(iterable.spliterator(), false);
         streamLines.limit(10)
                 .map(line -> line.split(",", 0))
-                .forEach(cityInfoArray -> System.out.println(Arrays.toString(cityInfoArray)));
+                //.peek(cityInfoArray -> System.out.println(Arrays.toString(cityInfoArray)))
+                .map(cityInfoArray -> CsvConverter.rowToCity(
+                        headers,
+                        cityInfoArray,
+                        Map.of(
+                                "name", "nom_standard",
+                                "inseeCode", "code_insee"
+                                // TODO: other infos
+                        )
+                ))
+                .forEach(System.out::println);
     }
 
 }
