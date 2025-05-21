@@ -7,8 +7,9 @@ import org.junit.jupiter.api.Test;
 import utils.CsvFormatException;
 import utils.IOTools;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -52,5 +53,66 @@ public class CityStreamPipelineDemo {
                 .limit(10)
                 .forEach(System.out::println);
     }
+
+    // 1. villes qui contiennent un A et un R et les ranger dans une liste (quelconque)
+    // 2. villes qui contiennent un A et un R et les ranger dans une liste de type array list
+    // 3. villes qui contiennent un A et un R et les ranger dans un ensemble ordonné par population décroissante
+    @Test
+    void demoCityNameContaining() {
+        Pattern pattern = Pattern.compile("(.*r.*a.*|.*a.*r.*)", Pattern.CASE_INSENSITIVE);
+        List<CityFrLbk> citiesAandR = streamCity.filter(city ->
+                        //city.getName().toLowerCase().contains("a") && city.getName().toLowerCase().contains("r")
+                        pattern.matcher(city.getName()).matches()
+                )
+                .toList(); // Shortcut Java 17
+                // .collect(Collectors.toList()); // Shortcut Java 8
+        System.out.println("Count: " + citiesAandR.size());
+        citiesAandR.stream()
+                .limit(10)
+                .forEach(System.out::println);
+        System.out.println("List class: " + citiesAandR.getClass());
+    }
+
+    @Test
+    void demoCityNameContainingArrayList() {
+        Pattern pattern = Pattern.compile("(.*r.*a.*|.*a.*r.*)", Pattern.CASE_INSENSITIVE);
+        List<CityFrLbk> citiesAandR = streamCity.filter(city ->
+                        //city.getName().toLowerCase().contains("a") && city.getName().toLowerCase().contains("r")
+                        pattern.matcher(city.getName()).matches()
+                )
+                .collect(Collectors.toCollection(ArrayList::new));
+        // .collect(Collectors.toList()); // Shortcut Java 8
+        System.out.println("Count: " + citiesAandR.size());
+        citiesAandR.stream()
+                .limit(10)
+                .forEach(System.out::println);
+        System.out.println("List class: " + citiesAandR.getClass());
+    }
+
+    @Test
+    void demoCityNameContainingOrderedSet() {
+        Pattern pattern = Pattern.compile("(.*r.*a.*|.*a.*r.*)", Pattern.CASE_INSENSITIVE);
+        NavigableSet<CityFrLbk> citiesAandR = streamCity.filter(city ->
+                        //city.getName().toLowerCase().contains("a") && city.getName().toLowerCase().contains("r")
+                        pattern.matcher(city.getName()).matches()
+                )
+                .collect(Collectors.toCollection(() -> new TreeSet<>(
+                        Comparator.comparing(CityFrLbk::getPopulation)
+                                .thenComparing(CityFrLbk::getInseeCode)
+                )));
+        // .collect(Collectors.toList()); // Shortcut Java 8
+        System.out.println("Count: " + citiesAandR.size());
+        citiesAandR.stream()
+                .limit(5)
+                .forEach(System.out::println);
+        System.out.println("...");
+        citiesAandR.stream()
+                .skip(citiesAandR.size() - 5)
+                .limit(5)
+                .forEach(System.out::println);
+        System.out.println();
+        System.out.println("List class: " + citiesAandR.getClass());
+    }
+
 
 }
