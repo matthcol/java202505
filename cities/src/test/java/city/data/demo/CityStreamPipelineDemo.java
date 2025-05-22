@@ -184,7 +184,7 @@ public class CityStreamPipelineDemo {
 
     // total population of department 30
     @ParameterizedTest
-    @ValueSource(strings={"30", "84"})
+    @ValueSource(strings={"30", "84", "666"})
     void demoPopulationTotal(String departmentNumber) {
         int populationTotal = streamCity.filter(dep -> dep.getDepartmentNumber().equals(departmentNumber))
                 .mapToInt(CityFrLbk::getPopulation)
@@ -192,18 +192,126 @@ public class CityStreamPipelineDemo {
         System.out.println(populationTotal);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings={"30", "84", "666"})
+    void demoPopulationMin(String departmentNumber) {
+        OptionalInt optPopulationMin = streamCity.filter(dep -> dep.getDepartmentNumber().equals(departmentNumber))
+                .mapToInt(CityFrLbk::getPopulation)
+                .min();
+        System.out.println("Optional min: " + optPopulationMin);
+        optPopulationMin.ifPresentOrElse(
+                min -> System.out.println("Min: " + min),
+                () -> System.out.println("No minimum")
+        );
+    }
+
     // min, max, average, total population of department + number of cities of this department
+    @ParameterizedTest
+    @ValueSource(strings={"30", "84", "666"})
+    void demoPopulationStatistics(String departmentNumber) {
+        IntSummaryStatistics stats = streamCity
+                .filter(dep -> dep.getDepartmentNumber().equals(departmentNumber))
+                .mapToInt(CityFrLbk::getPopulation)
+                .summaryStatistics();
+        System.out.println("All stats: " + stats);
+        System.out.println("Count: " + stats.getCount());
+        System.out.println("Min: " + stats.getMin());
+        System.out.println("Max: " + stats.getMax());
+        System.out.println("Average: " + stats.getAverage());
+        System.out.println("Sum: " + stats.getSum());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"30", "84", "666"})
+    void demoPopulationStatistics2(String departmentNumber) {
+        IntSummaryStatistics stats = streamCity
+                .filter(dep -> dep.getDepartmentNumber().equals(departmentNumber))
+                .collect(Collectors.summarizingInt(CityFrLbk::getPopulation));
+        System.out.println("All stats: " + stats);
+        System.out.println("Count: " + stats.getCount());
+        System.out.println("Min: " + stats.getMin());
+        System.out.println("Max: " + stats.getMax());
+        System.out.println("Average: " + stats.getAverage());
+        System.out.println("Sum: " + stats.getSum());
+    }
 
     // Top 5 populations (integers only)
+    @Test
+    void demoTop5Populations() {
+        int topThreshold = 5;
+        List<Integer> top5population = streamCity
+                .sorted(Comparator.comparingInt(CityFrLbk::getPopulation).reversed())
+                .mapToInt(CityFrLbk::getPopulation)
+                .limit(topThreshold)
+                .boxed()
+                .toList();
+        System.out.println(top5population);
+    }
+
+    @Test
+    void demoTop5PopulationCities() {
+        int topThreshold = 5;
+        List<CityFrLbk> top5populationCities = streamCity
+                .sorted(Comparator.comparingInt(CityFrLbk::getPopulation).reversed())
+                .limit(topThreshold)
+                .toList();
+        top5populationCities.forEach(System.out::println);
+    }
 
     // names of cities from department 30 separated with a comma
     // Ex: Nîmes, Les Angles
+    @ParameterizedTest
+    @ValueSource(strings = {"30","84"})
+    void demoCitiesComma30(String DepartmentNumber) {
+        String listCities = streamCity
+                .filter(dep -> dep.getDepartmentNumber().equals(DepartmentNumber))
+                .map(CityFrLbk::getName)
+                .collect(Collectors.joining(", "));
+        System.out.println(listCities);
 
+    }
 
     // number of cities by department
+    @Test
+    void demoCountCityByDep() {
+        Map<String, Long> cityCountByDepartment = streamCity
+                .collect(Collectors.groupingBy(
+                        CityFrLbk::getDepartmentNumber,
+                        Collectors.counting()
+                ));
+        cityCountByDepartment.forEach((dep, count) ->
+                System.out.println(dep + " : " + count + " villes"));
+    }
+
+    @Test
+    void demoCountCityByDep2() {
+        // choose type of Map: sort keys (departmentNumber)
+        Map<String, Long> cityCountByDepartment = streamCity
+                .collect(Collectors.groupingBy(
+                        CityFrLbk::getDepartmentNumber,
+                        TreeMap::new,
+                        Collectors.counting()
+                ));
+        cityCountByDepartment.forEach((dep, count) ->
+                System.out.println(dep + " : " + count + " villes"));
+    }
 
     // list of cities by department
+    @Test
+    void demoCityByDep() {
+        Map<String, List<CityFrLbk>> cityCountByDepartment = streamCity
+                .collect(Collectors.groupingBy(
+                        CityFrLbk::getDepartmentNumber
+                ));
+        // display a small part of the result
+        cityCountByDepartment.forEach((dep, cityList) -> {
+            System.out.println("* "  + dep + " : ");
+            cityList.forEach(city -> System.out.println("\t- " + city));
+        });
+
+    }
 
     // partition cities with a population threshold
     // Ex: population >= 100K, population < 100K
+
 }
