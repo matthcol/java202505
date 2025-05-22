@@ -4,6 +4,9 @@ import city.converter.CsvConverter;
 import city.data.CityFrLbk;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import utils.CsvFormatException;
 import utils.IOTools;
 
@@ -168,10 +171,39 @@ public class CityStreamPipelineDemo {
         // 3 cities with no zipcode
     }
 
+    // Exercise: count cities of department 30
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings={"30", "84"})
+    void demoCountCities(String departmentNumber) {
+        long cityCount = streamCity
+                .filter(dep -> dep.getDepartmentNumber().equals(departmentNumber))
+                .count();
+        System.out.println(cityCount);
+    }
 
-    // count cities of department 30
+    // total population of department 30
+    @ParameterizedTest
+    @ValueSource(strings={"30", "84"})
+    void demoPopulationTotal(String departmentNumber) {
+        int populationTotal = streamCity.filter(dep -> dep.getDepartmentNumber().equals(departmentNumber))
+                .mapToInt(CityFrLbk::getPopulation)
+                .sum();
+        System.out.println(populationTotal);
+    }
 
-    //
+    // min, max, average, total population of department + number of cities of this department
+
+    // Top 5 populations (integers only)
+
+    // names of cities from department 30 separated with a comma
+    // Ex: Nîmes, Les Angles
 
 
+    // number of cities by department
+
+    // list of cities by department
+
+    // partition cities with a population threshold
+    // Ex: population >= 100K, population < 100K
 }
