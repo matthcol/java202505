@@ -21,9 +21,10 @@ public class CityFrLbk {
     @NotNull(message = "{cityfrblk.name.notnull}")
     private String name;
 
+    @NotNull
     private String inseeCode;
 
-    @NotNull
+    //@NotNull
     @Size(min=5, max=5, message = "{cityfrblk.zipcode.size}")
     private String zipcode;
 
