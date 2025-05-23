@@ -2,7 +2,7 @@
 services:
       
   db:
-    image: postgres:${DB_VERSION:-latest}
+    image: postgres:${DB_TAG:-latest}
     restart: unless-stopped
     ports:
       - ${DB_PORT:-5432}:5432
