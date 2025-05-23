@@ -9,11 +9,12 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import utils.CsvFormatException;
 import utils.IOTools;
+import utils.function.IntDoubleBoolToDoubleFunction;
 
 import java.util.*;
+import java.util.function.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -299,19 +300,93 @@ public class CityStreamPipelineDemo {
     // list of cities by department
     @Test
     void demoCityByDep() {
-        Map<String, List<CityFrLbk>> cityCountByDepartment = streamCity
+        // NB: var=Map<String, List<CityFrLbk>>
+        var cityCountByDepartment = streamCity
                 .collect(Collectors.groupingBy(
                         CityFrLbk::getDepartmentNumber
                 ));
-        // display a small part of the result
-        cityCountByDepartment.forEach((dep, cityList) -> {
-            System.out.println("* "  + dep + " : ");
-            cityList.forEach(city -> System.out.println("\t- " + city));
+        // display a small part of the result (1o first dept, 10 cities each)
+        cityCountByDepartment
+                .entrySet()
+                .stream()
+                .limit(10)
+                .forEach(entryDepListCity -> {
+            System.out.println("* "  + entryDepListCity.getKey() + " : ");
+            entryDepListCity.getValue()
+                    .stream().limit(10).forEach(city -> System.out.println("\t- " + city));
         });
 
     }
 
     // partition cities with a population threshold
     // Ex: population >= 100K, population < 100K
+
+    // NB: iterate on maps
+    @Test
+    void demoIterateMap() {
+        var map = Map.of(
+                "30", "Nîmes",
+                "84", "Avignon",
+                "64", "Pau"
+        );
+        System.out.println(map);
+
+        for (String dep: map.keySet()) {
+            System.out.println(dep);
+        }
+        System.out.println();
+
+        for (String city: map.values()) {
+            System.out.println(city);
+        }
+        System.out.println();
+
+        map.keySet()
+                .forEach(System.out::println);
+        System.out.println();
+
+        map.values()
+                .forEach(System.out::println);
+        System.out.println();
+
+        map.values()
+                .stream()
+                .map(String::toUpperCase)
+                .forEach(System.out::println);
+        System.out.println();
+
+        for (Map.Entry<String,String> entryDepCity: map.entrySet()) {
+            System.out.println(entryDepCity.getKey() + " : " + entryDepCity.getValue());
+        }
+        System.out.println();
+
+        map.forEach((dep, city) -> System.out.println(dep + " : " + city));
+        System.out.println();
+
+        map.entrySet()
+                .stream()
+                .limit(2)
+                .forEach(entryDepCity ->  System.out.println(
+                            entryDepCity.getKey()
+                            + " : "
+                            + entryDepCity.getValue()
+                ));
+    }
+
+    @Test
+    void demoFunctionalTypes() {
+        Function<String, String> f0 = (String text) -> text.toUpperCase().substring(10);
+        Supplier<CityFrLbk> f1 = () -> CityFrLbk.builder().name("Pau").build();
+        Supplier<CityFrLbk> f1b = CityFrLbk::new; // default constructor
+        Predicate<CityFrLbk> f2 = city -> !city.getName().isEmpty();
+        BiConsumer<CityFrLbk, String> f3 = (city, departement) -> city.setDepartment(departement);
+        BiConsumer<CityFrLbk, String> f3b = CityFrLbk::setDepartment;
+        IntBinaryOperator f4 = (a, b) -> a + b;
+        IntBinaryOperator f4b = Integer::sum;
+        IntBinaryOperator f4c = (a, b) -> (int) Math.pow(a, b);
+
+
+        IntDoubleBoolToDoubleFunction f5 = (int x, double y, boolean z) -> z ? Math.pow(y, x) : Math.sqrt(y);
+    }
 
 }
