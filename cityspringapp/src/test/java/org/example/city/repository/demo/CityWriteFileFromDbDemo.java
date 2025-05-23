@@ -1,11 +1,11 @@
 package org.example.city.repository.demo;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TupleElement;
+import jakarta.persistence.*;
 import org.example.city.entity.CityFr;
 import org.example.city.repository.CityRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
@@ -78,7 +79,7 @@ public class CityWriteFileFromDbDemo {
                 """;
 
         // Execute query and store each row in a JPA Tuple object
-        var query = entityManager.createQuery(sql, Tuple.class);
+        TypedQuery<Tuple> query = entityManager.createQuery(sql, Tuple.class);
         //  query.getResultStream()
         //       .limit(5)
         //       .forEach(System.out::println);
@@ -97,14 +98,39 @@ public class CityWriteFileFromDbDemo {
         try (
                 // Text stream
                 Writer writer = new FileWriter(pathOut.toFile(), StandardCharsets.UTF_8);
-                BufferedWriter bufferedWriter = new BufferedWriter((writer));
+                PrintWriter printWriter = new PrintWriter(writer);
         ) {
-
-                // TODO: write headers
-
-                // TODO: loop write rows
-
+            // print headers
+            printWriter.println(String.join(",", headers));
+            // print data
+            for (Tuple result : results) {
+                int n = result.getElements().size();
+                String resultLine = IntStream.range(0, n)
+                        .mapToObj(i -> result.get(i).toString())
+                        .collect(Collectors.joining(","));
+                printWriter.println(resultLine);
+            }
         } // close resources
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"30", "84", "64", "666"})
+    void demoNativeQuery(String dept){
+        String sql = """
+                SELECT nom_standard, population
+                FROM city
+                WHERE dep_code = ?
+                ORDER BY population DESC 
+                """;
+        // NB: type of each row is dynamic, no static checking
+        Query query =  entityManager.createNativeQuery(sql, Tuple.class);
+        List<?> results = query
+                .setParameter(1, dept)
+                .getResultList();
+        results.forEach(row -> {
+            Tuple rowTuple = (Tuple) row;
+            System.out.println(rowTuple);
+        });
     }
 
 }
