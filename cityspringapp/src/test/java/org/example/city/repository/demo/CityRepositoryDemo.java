@@ -2,6 +2,8 @@ package org.example.city.repository.demo;
 
 import org.example.city.repository.CityRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -9,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.text.MessageFormat;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 
 
@@ -36,6 +37,24 @@ class CityRepositoryDemo {
                                 id
                         ))
                 );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"30", "84", "64", "666"})
+    void demoFindByDepartment(String departmentNumber) {
+        cityRepository.findByDepartmentNumberOrderByPopulationDesc(departmentNumber)
+                .stream()
+                .limit(10)
+                .forEach(System.out::println);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"30", "84", "64", "666"})
+    void demoFindByDepartmentJPQL(String departmentNumber) {
+        cityRepository.findByDepartment(departmentNumber)
+                .stream()
+                .limit(10)
+                .forEach(System.out::println);
     }
 
 }

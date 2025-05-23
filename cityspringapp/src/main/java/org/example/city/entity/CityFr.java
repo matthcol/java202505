@@ -33,4 +33,7 @@ public class CityFr {
     private String zipcode;
 
     private Integer population;
+
+    @Column(name="dep_code")
+    private String departmentNumber;
 }
